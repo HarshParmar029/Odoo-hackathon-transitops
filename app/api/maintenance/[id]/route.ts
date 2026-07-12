@@ -1,33 +1,34 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const body = await req.json();
     const { status } = body;
 
-    if (!status) {
-      return NextResponse.json({ error: "Status is required" }, { status: 400 });
-    }
-
-    const maintenance = await prisma.maintenance.findUnique({ where: { id: params.id }, include: { vehicle: true } });
+    const maintenance = await prisma.maintenance.findUnique({ where: { id } });
     if (!maintenance) {
       return NextResponse.json({ error: "Maintenance record not found" }, { status: 404 });
     }
 
     const updated = await prisma.$transaction(async (tx) => {
-      const updatedMaintenance = await tx.maintenance.update({ where: { id: params.id }, data: { status } });
+      const record = await tx.maintenance.update({
+        where: { id },
+        data: { status: status || "COMPLETED" },
+      });
 
-      if (status === "COMPLETED" && maintenance.vehicle.status === "IN_SHOP") {
+      const vehicle = await tx.vehicle.findUnique({ where: { id: maintenance.vehicleId } });
+      if (vehicle && vehicle.status !== "RETIRED") {
         await tx.vehicle.update({ where: { id: maintenance.vehicleId }, data: { status: "AVAILABLE" } });
       }
 
-      return updatedMaintenance;
+      return record;
     });
 
-    return NextResponse.json({ message: "Maintenance updated", maintenance: updated });
+    return NextResponse.json({ message: "Maintenance closed", maintenance: updated });
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ error: "Failed to update maintenance" }, { status: 500 });
+    return NextResponse.json({ error: "Failed to update maintenance record" }, { status: 500 });
   }
 }

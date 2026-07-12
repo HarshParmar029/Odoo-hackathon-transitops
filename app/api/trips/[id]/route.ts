@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const body = await req.json();
     const { action, actualDistance, fuelConsumed } = body;
 
-    const trip = await prisma.trip.findUnique({ where: { id: params.id } });
+    const trip = await prisma.trip.findUnique({ where: { id } });
     if (!trip) return NextResponse.json({ error: "Trip not found" }, { status: 404 });
 
     if (trip.status !== "DISPATCHED") {
@@ -16,7 +17,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     if (action === "complete") {
       const updatedTrip = await prisma.$transaction(async (tx) => {
         const t = await tx.trip.update({
-          where: { id: params.id },
+          where: { id },
           data: {
             status: "COMPLETED",
             actualDistance: actualDistance ? Number(actualDistance) : trip.plannedDistance,
@@ -36,7 +37,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 
     if (action === "cancel") {
       const updatedTrip = await prisma.$transaction(async (tx) => {
-        const t = await tx.trip.update({ where: { id: params.id }, data: { status: "CANCELLED" } });
+        const t = await tx.trip.update({ where: { id }, data: { status: "CANCELLED" } });
         await tx.vehicle.update({ where: { id: trip.vehicleId }, data: { status: "AVAILABLE" } });
         await tx.driver.update({ where: { id: trip.driverId }, data: { status: "AVAILABLE" } });
         return t;
