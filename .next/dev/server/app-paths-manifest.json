@@ -1,5 +1,0 @@
-{
-  "/api/drivers/route": "app/api/drivers/route.js",
-  "/api/trips/route": "app/api/trips/route.js",
-  "/api/vehicles/route": "app/api/vehicles/route.js"
-}
