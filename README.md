@@ -22,7 +22,7 @@ A modern, rule-enforced fleet management platform that replaces spreadsheets and
 
 | Layer | Technology |
 |---|---|
-| Frontend | Next.js 14 (App Router) + TypeScript + Tailwind CSS |
+| Frontend | Next.js 16 (App Router) + TypeScript + Tailwind CSS |
 | Backend | Next.js API Routes |
 | Database | Prisma ORM + SQLite |
 | Auth | JWT (jose for Edge middleware) + bcrypt password hashing |
@@ -85,7 +85,7 @@ Open `http://localhost:3000` → redirects to `/login`. Sign up to create your f
 
 ## 📊 Database Schema
 
-**Entities:** `User`, `Vehicle`, `Driver`, `Trip`, `MaintenanceLog`, `FuelLog`, `Expense`
+**Entities:** `User`, `Vehicle`, `Driver`, `Trip`, `Maintenance`, `FuelEntry`, `Expense`
 
 All relationships are enforced at the database level via Prisma, with cascading business logic handled in transactional API routes to guarantee data consistency (e.g., dispatching a trip updates the trip, vehicle, and driver in a single atomic transaction).
 
@@ -93,12 +93,19 @@ All relationships are enforced at the database level via Prisma, with cascading 
 
 ## 📸 Screenshots
 
-*(Add screenshots here before final submission)*
+![Dashboard](screenshots/dashboard.png)
+![Vehicles](screenshots/vehicles.png)
+![Drivers](screenshots/drivers.png)
+![Trips](screenshots/trips.png)
+![Maintenance](screenshots/maintenance.png)
+![Reports](screenshots/reports.png)
 
-- Dashboard with live KPIs
-- Vehicle Registry with status badges
-- Trip creation with real-time validation
-- Reports & Analytics page
+---
+
+## ⚠️ Known Limitations
+
+- Revenue tracking is not yet implemented; the ROI calculation currently uses a cost-only baseline (0 revenue), so ROI reflects accumulated cost against acquisition cost rather than full profitability.
+- Dashboard filters by region and vehicle type are planned for a future iteration.
 
 ---
 
