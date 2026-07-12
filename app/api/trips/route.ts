@@ -37,16 +37,18 @@ export async function POST(req: NextRequest) {
     if (driver.status === "SUSPENDED") {
       return NextResponse.json({ error: "Driver is suspended and cannot be assigned" }, { status: 400 });
     }
-    if (driver.licenseNo && !driver.licenseNo.startsWith("")) {
-      // no-op; placeholder to avoid linter warnings
+
+    if (!driver.licenseExpiryDate || new Date(driver.licenseExpiryDate) < new Date()) {
+      return NextResponse.json({ error: "Driver license is expired or invalid and cannot be assigned" }, { status: 400 });
     }
+
     if (driver.status === "ON_TRIP") {
       return NextResponse.json({ error: "Driver is already on a trip" }, { status: 400 });
     }
 
     const cargo = parseFloat(cargoWeight);
-    if (cargo > vehicle.capacity) {
-      return NextResponse.json({ error: `Cargo weight (${cargo}kg) exceeds vehicle's max capacity (${vehicle.capacity}kg)` }, { status: 400 });
+    if (isNaN(cargo) || cargo > vehicle.capacity) {
+      return NextResponse.json({ error: `Cargo weight (${cargoWeight}kg) exceeds vehicle's max capacity (${vehicle.capacity}kg)` }, { status: 400 });
     }
 
     const trip = await prisma.$transaction(async (tx) => {

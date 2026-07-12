@@ -23,20 +23,21 @@ model User {
 }
 
 model Vehicle {
-  id            String   @id @default(cuid())
-  plateNumber   String   @unique
-  model         String
-  type          String
-  capacity      Int
-  status        String   @default("AVAILABLE")
-  mileage       Int      @default(0)
-  lastServiceAt DateTime?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  trips         Trip[]
-  maintenance   Maintenance[]
-  fuelEntries   FuelEntry[]
-  expenses      Expense[]
+  id              String      @id @default(cuid())
+  plateNumber     String      @unique
+  model           String
+  type            String
+  capacity        Int
+  status          String      @default("AVAILABLE")
+  mileage         Int         @default(0)
+  acquisitionCost Float?
+  lastServiceAt   DateTime?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  trips           Trip[]
+  maintenance     Maintenance[]
+  fuelEntries     FuelEntry[]
+  expenses        Expense[]
 }
 
 model Driver {
